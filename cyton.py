@@ -8,17 +8,10 @@ START = 0xA0
 END_C0 = 0xC0
 END_C1 = 0xC1
 
-def int24_to_bytes_le(v: int) -> bytes:
-    # clamp signed 24-bit
-    if v > 0x7FFFFF:
-        v = 0x7FFFFF
-    if v < -0x800000:
-        v = -0x800000
-    # two's complement for negative
+def int24_to_bytes_msb(v: int) -> bytes:
     if v < 0:
         v = (1 << 24) + v
-    # little-endian: LSB first (per OpenBCI_GUI InterfaceSerial.pde comment)
-    return bytes([v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF])
+    return bytes([(v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF])
 
 def make_packet(sample_id: int, t: float, end_byte: int = END_C0) -> bytes:
     # 8 EEG channels, 24-bit signed counts (ADS1299 raw-ish)
@@ -37,7 +30,7 @@ def make_packet(sample_id: int, t: float, end_byte: int = END_C0) -> bytes:
     pkt.append(START)
     pkt.append(sample_id & 0xFF)
     for v in chans:
-        pkt.extend(int24_to_bytes_le(v))
+        pkt.extend(int24_to_bytes_msb(v))
     pkt.extend(aux6)
     pkt.append(end_byte)
     return bytes(pkt)  # 33 bytes
