@@ -69,17 +69,18 @@ def main():
             cmd = ser.read(64)
             if cmd:
                 for b in cmd:
-                    if b == ord('b'):
+                    if b == ord("b"):
                         streaming = True
                         print("START")
-                    if b == ord('v'):
+                    if b == ord("v"):
                         streaming = False
                         sample_id = 0
-                        ser.write(b"OpenBCI V3 Simulator\n$$$")
-                    elif b == ord('s'):
+                        ser.write(b"OpenBCI V3 Simulator\nFirmware: v3.0.0\n$$$")
+                    elif b == ord("d"):
+                        ser.write(b"Default channel settings\n$$$")
+                    elif b == ord("s"):
                         streaming = False
                         print("STOP")
-                        
             if cmd:
               print(f"Received command: {cmd}")                        
 
